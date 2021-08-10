@@ -43,7 +43,8 @@ class StorageBin extends Model
     }
     public function add(string $product_id, int $quantity, float $cost, string $date_purchased)
     {
-        $this->check_quantity($quantity);
+        $this->check_quantity($quantity)
+            ->check_products_id($product_id);
 
         if ($this->product_id !== $product_id) {
             throw new StorageException("This storage bin is for '$this->product_id', unable to add '{$product_id}'");
@@ -51,6 +52,19 @@ class StorageBin extends Model
 
         $this->level += $quantity;
         $control[] = ["quantity" => $quantity, "cost" => $cost, "date" => $date_purchased];
+    }
+    public function remove(string $products_id, int $quantity)
+    {
+        //
+
+    }
+    private function check_products_id(string $product_id)
+    {
+        if ($this->product_id !== $product_id) {
+            throw new StorageException("This storage bin is for '$this->product_id', unable to add '{$product_id}'");
+        }
+
+        return $this;
     }
     private function check_quantity(int $quantity) 
     {

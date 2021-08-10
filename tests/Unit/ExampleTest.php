@@ -43,4 +43,10 @@ class FreetimersTest extends TestCase
         $bin = new \App\Models\StorageBin("bolts", 10, 10.00, date("2021-01-01"));
         $bin->add("bolts", -10, 10.99, date("2021-01-01"));
     }
+    public function test_removing_stock()
+    {
+        $bin = new \App\Models\StorageBin("bolts", 10, 10.00, date("2021-01-01"));
+        $bin->remove("bolts", 1);
+
+    }
 }
