@@ -41,10 +41,13 @@ class StorageBin extends Model
 
         $this->add($product_id, $quantity, $cost, $date_purchased);
     }
+    public function getStatus() {
+        return ["product_id" => $this->product_id, "level" => $this->level];
+    }
     public function add(string $product_id, int $quantity, float $cost, string $date_purchased)
     {
         $this->check_quantity($quantity)
-            ->check_products_id($product_id);
+            ->check_product_id($product_id);
 
         if ($this->product_id !== $product_id) {
             throw new StorageException("This storage bin is for '$this->product_id', unable to add '{$product_id}'");
@@ -53,12 +56,26 @@ class StorageBin extends Model
         $this->level += $quantity;
         $control[] = ["quantity" => $quantity, "cost" => $cost, "date" => $date_purchased];
     }
-    public function remove(string $products_id, int $quantity)
+    public function remove(string $product_id, int $quantity) : int
     {
-        //
+        $this->check_quantity($quantity)
+            ->check_product_id($product_id);
 
+        if ($this->level === 0) {
+            throw new StorageException("Unable to remove '{$quantity}' from '{$product_id}' as the stock level is 0 {zero)");
+        }
+
+        $result = 0;
+        if ($quantity > $this->level) {
+            $result = abs($this->level - $quantity);
+            $this->level = 0;
+        } else {
+            $this->level -= $quantity;
+        }
+    
+        return $result;
     }
-    private function check_products_id(string $product_id)
+    private function check_product_id(string $product_id)
     {
         if ($this->product_id !== $product_id) {
             throw new StorageException("This storage bin is for '$this->product_id', unable to add '{$product_id}'");
@@ -69,7 +86,7 @@ class StorageBin extends Model
     private function check_quantity(int $quantity) 
     {
         if ($quantity < 1) {
-            throw new StorageException("Unable to add quantity '{$quantity}' as it is less than 1 (one)");
+            throw new StorageException("Unable to use quantity '{$quantity}' as it is less than 1 (one)");
         }
 
         return $this;
