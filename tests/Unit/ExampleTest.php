@@ -3,8 +3,9 @@
 namespace Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
+use \app\Models;
 
-class ExampleTest extends TestCase
+class FreetimersTest extends TestCase
 {
     /**
      * A basic test example.
@@ -14,5 +15,11 @@ class ExampleTest extends TestCase
     public function test_example()
     {
         $this->assertTrue(true);
+    }
+
+    public function test_starage_bin_exists()
+    {
+        $bin = new \App\Models\StorageBin();
+        $this->assertIsObject($bin);
     }
 }
