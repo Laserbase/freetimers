@@ -26,16 +26,17 @@ class StorageBin extends Model
     private int $level = 0;
     private $control = [];
     private $overflow = 0;
+    private string $calc_method = 'fifo';
     private string $status = 'undefined';
 
-    public function __construct(string $product_id, int $quantity, float $cost, string $date_purchased)
+    public function __construct(string $product_id, int $quantity, float $cost, string $date_purchased, $calc_method = 'fifo')
     {
-        if ($this->level === 0) {
-            $this->product_id = $product_id;
-            $this->level = 0;
-            $this->control = [];
-            $this->status = 'ok';
-        }
+        $this->set_calc_method($product_id, $calc_method);
+
+        $this->product_id = $product_id;
+        $this->level = 0;
+        $this->control = [];
+        $this->status = 'ok';
 
         $this->add($product_id, $quantity, $cost, $date_purchased);
     }
@@ -48,7 +49,15 @@ class StorageBin extends Model
         $this->level += $quantity;
         $this->setStatus('ok');
         $this->overflow = 0;
-        $this->control[] = ["quantity" => $quantity, "cost" => $cost, "date" => $date_purchased];
+
+        $item = ["quantity" => $quantity, "cost" => $cost, "date" => $date_purchased];
+        if ($this->calc_method === 'lifo') {
+            // 
+            array_unshift($this->control, $item);
+        } else {
+            // fifo, avco
+            $this->control[] = $item;
+        }
     }
 
     public function remove(string $product_id, int $quantity) : int
@@ -141,6 +150,7 @@ class StorageBin extends Model
         return [
             "product_id" => $this->product_id, 
             "status" => $this->status,
+            "calc_method" => $this->calc_method,
             "level" => $this->level, 
             "control" => $this->control,
             "overflow" => $this->overflow
@@ -160,6 +170,24 @@ class StorageBin extends Model
     }
 
     //--- private ---
+    private function set_calc_method(string $product_id, string $calc_method)
+    {
+        switch ($calc_method) {
+            case 'fifo':
+            case 'lifo':
+            case 'avco':
+                $this->calc_method = $calc_method;
+                return $this;
+            default:
+            throw new StorageException(
+                "Unable to set stock calculation for '{$product_id}' ".
+                "with unknown method '{$calc_method}'".
+                ", Expecting one of 'fifo", 'lifo', 'avco'
+            );
+        }
+
+    }
+
     private function check_can_add(int $quantity)
     {
         switch ($this->status) {
