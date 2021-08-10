@@ -129,4 +129,15 @@ class FreetimersTest extends TestCase
         $this->assertTrue($status["level"] === 10);
         //---
     }
+
+    public function test_moving_stock()
+    {
+        $this->expectException(\app\Models\StorageException::class);
+
+        $bolts = new \App\Models\StorageBin("bolts", 10, 10.00, date("2021-01-01"));
+        $screws = new \App\Models\StorageBin("screws", 1, 1.00, date("2021-01-01"));
+        $overflow = Bolts->move($screws, 1);
+        
+        $this->assertTrue(false);
+    }
 }
