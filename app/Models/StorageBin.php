@@ -126,6 +126,10 @@ class StorageBin extends Model
 
         return $this->overflow = $quantity_to_move;
     }
+    public function spoil()
+    {
+        throw new \Exception("Not Implemented yet");
+    }
 
     public function getStatus() {
         return [
