@@ -21,16 +21,12 @@ use Illuminate\Database\Eloquent\Model;
 class StorageException extends \Exception { }
 class StorageBin extends Model
 {
-    use HasFactory;
+    //use HasFactory;
     private string $product_id = "";
     private int $level = 0;
     private $control = [];
     private $overflow = 0;
-    /**
-     *     private int $quantity = 0; 
-     *     private decimal $cost = 0.00;
-     *     private $date_purchased;
-     */
+    private string $status = 'undefined';
 
     public function __construct(string $product_id, int $quantity, float $cost, string $date_purchased)
     {
@@ -38,6 +34,7 @@ class StorageBin extends Model
             $this->product_id = $product_id;
             $this->level = 0;
             $this->control = [];
+            $this->status = 'ok';
         }
 
         $this->add($product_id, $quantity, $cost, $date_purchased);
@@ -45,13 +42,12 @@ class StorageBin extends Model
     public function add(string $product_id, int $quantity, float $cost, string $date_purchased)
     {
         $this->check_quantity($quantity)
-            ->check_product_id($product_id);
-
-        if ($this->product_id !== $product_id) {
-            throw new StorageException("This storage bin is for '$this->product_id', unable to add '{$product_id}'");
-        }
+            ->check_product_id($product_id)
+            ->check_can_add($quantity);
 
         $this->level += $quantity;
+        $this->setStatus('ok');
+        $this->overflow = 0;
         $this->control[] = ["quantity" => $quantity, "cost" => $cost, "date" => $date_purchased];
     }
 
@@ -59,7 +55,8 @@ class StorageBin extends Model
     {
         $this->check_quantity($quantity)
             ->check_product_id($product_id)
-            ->check_stock_level($product_id, $quantity);
+            ->check_stock_level($product_id, $quantity)
+            ->check_can_remove($quantity);
         
         $quantity_to_remove = $quantity;
         foreach ($this->control as $key => $control) {
@@ -85,6 +82,10 @@ class StorageBin extends Model
         
         }
 
+        if ($this->level < 1) {
+            $this->status = 'empty';
+        }
+
         return $this->overflow = $quantity_to_remove;
     }
     public function move(StorageBin $to_bin, int $quantity) : int
@@ -96,7 +97,8 @@ class StorageBin extends Model
         }
 
         $this->check_quantity($quantity)
-            ->check_stock_level($product_id, $quantity);
+            ->check_stock_level($product_id, $quantity)
+            ->check_can_remove($quantity);
 
         $quantity_to_move = $quantity;
         foreach ($this->control as $key => $control) {
@@ -124,23 +126,60 @@ class StorageBin extends Model
             $to_bin->add($product_id, $quantity_available, $cost, $date);
         }
 
+        if ($this->level < 1) {
+            $this->status = 'empty';
+        }
+
         return $this->overflow = $quantity_to_move;
     }
     public function spoil()
     {
-        throw new \Exception("Not Implemented yet");
+        $this->setStatus('spoiled');
     }
 
     public function getStatus() {
         return [
             "product_id" => $this->product_id, 
+            "status" => $this->status,
             "level" => $this->level, 
             "control" => $this->control,
             "overflow" => $this->overflow
         ];
     }
+    private function setStatus(string $status = 'OK')
+    {
+        switch ($status) {
+            case 'ok':
+            case 'empty':
+            case 'spoiled':
+                $this->status = $status;
+                return $this;
+            default:
+                throw new StorageException("Unable to set status to unknown value '{$status}'");
+        }
+    }
 
-    //---
+    //--- private ---
+    private function check_can_add(int $quantity)
+    {
+        switch ($this->status) {
+            case 'ok':
+            case 'empty':
+                return $this;
+            default:
+                throw new StorageException("Unable to add '{$quantity}' item from storage bin for '$this->product_id', as it is '{$this->status}'");
+        }
+    }
+    private function check_can_remove(int $quantity)
+    {
+        switch ($this->status) {
+            case 'ok':
+                return $this;
+            default:
+                throw new StorageException("Unable to add '{$quantity}' item from storage bin for '$this->product_id', as it is '{$this->status}'");
+        }
+
+    }
     private function check_product_id(string $product_id)
     {
         if ($this->product_id !== $product_id) {
@@ -163,6 +202,7 @@ class StorageBin extends Model
             throw new StorageException("Unable to remove '{$quantity}' from '{$product_id}' as the stock level is 0 {zero)");
         }
 
+        return $this;
     }
     public function log(string $msg, int $line = 0)
     {

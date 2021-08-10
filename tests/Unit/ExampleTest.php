@@ -111,29 +111,31 @@ class FreetimersTest extends TestCase
         $status = $bin->getStatus();
         $this->assertTrue($overflow === 0); 
         $this->assertTrue($status["level"] === 1);
-
+        
+        //--- reset
         $bin->add("bolts", 9, 10.00, date("03-03-2021"));
         $status = $bin->getStatus();
         $this->assertTrue($status["level"] === 10);
-        
         //--- leave no stock
         $overflow = $bin->remove("bolts", 10);
         $status = $bin->getStatus();
         $this->assertTrue($overflow === 0); 
         $this->assertTrue($status["level"] === 0);
 
+        //--- reset
         $bin->add("bolts", 10, 10.00, date("03-03-2021"));
         $status = $bin->getStatus();
         $this->assertTrue($status["level"] === 10);
-
         //--- overflow one stock
         $overflow = $bin->remove("bolts", 11);
         $status = $bin->getStatus();
         $this->assertTrue($overflow === 1); 
         $this->assertTrue($status["level"] === 0);
 
+        //--- reset
         $bin->add("bolts", 10, 10.00, date("03-03-2021"));
         $status = $bin->getStatus();
+        $this->assertTrue($status["overflow"] === 0); 
         $this->assertTrue($status["level"] === 10);
         //---
     }
