@@ -17,15 +17,47 @@ use Illuminate\Database\Eloquent\Model;
  *      First in first out
  *      Average stock price
  */
+
+class StorageException extends \Exception { }
 class StorageBin extends Model
 {
     use HasFactory;
-    public function __construct()
+    private string $product_id = "";
+    private int $level = 0;
+    private $control = [];
+    /**
+     *     private int $quantity = 0; 
+     *     private decimal $cost = 0.00;
+     *     private $date_purchased;
+     */
+
+    public function __construct(string $product_id, int $quantity, float $cost, string $date_purchased)
     {
-        $this->add();
+        if ($this->level === 0) {
+            $this->product_id = $product_id;
+            $this->level = 0;
+            $this->control = [];
+        }
+
+        $this->add($product_id, $quantity, $cost, $date_purchased);
     }
-    public function add()
+    public function add(string $product_id, int $quantity, float $cost, string $date_purchased)
     {
-        throw new \Exception("Not Implemented");
+        $this->check_quantity($quantity);
+
+        if ($this->product_id !== $product_id) {
+            throw new StorageException("This storage bin is for '$this->product_id', unable to add '{$product_id}'");
+        }
+
+        $this->level += $quantity;
+        $control[] = ["quantity" => $quantity, "cost" => $cost, "date" => $date_purchased];
+    }
+    private function check_quantity(int $quantity) 
+    {
+        if ($quantity < 1) {
+            throw new StorageException("Unable to add quantity '{$quantity}' as it is less than 1 (one)");
+        }
+
+        return $this;
     }
 }

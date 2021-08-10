@@ -1,4 +1,4 @@
-Freetimers Candidate Test
+# Freetimers Candidate Test
 
 Congratulations on completing the first round of interviews, this means that you are well on the way towards obtaining a role at Freetimers!
 The following test is to ensure that you have the technical skills required to perform daily duties in the job for which you have applied. It is in your best interests to complete this test in full without plagiarising the work of others.
@@ -22,3 +22,20 @@ Your code will comply with PSR-0, and PSR-2 coding standards
 
 Submission:
 Please submit your code into a suitable git repository for evaluation and assessment
+
+# Errors
+- 2021-08-10 
+.gitignore insisted on being tracked
+solution edit .got/info/exclude to ignore .gitignore file, never seen this problem before
+
+- 2021-08-10 11:10
+```remote: Resolving deltas: 100% (12/12), completed with 12 local objects.
+remote: error: GH007: Your push would publish a private email address.
+remote: You can make your email public or disable this protection by visiting:
+remote: http://github.com/settings/emails
+To github.com:Laserbase/freetimers.git
+```
+solution git commit --amend --author "John Griffiths <xxxxxxxxxx+Laserbase@users.noreply.github.com >"
+
+- //
+
