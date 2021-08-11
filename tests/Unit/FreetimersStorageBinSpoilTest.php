@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 use \app\Models;
 use \app\Models\StarageBin;
 
-class FreetimersSpoilTest extends TestCase
+class FreetimersStorageBinSpoilTest extends TestCase
 {
     public function test_starage_bin_spoil()
     {   

@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 use \app\Models;
 use \app\Models\StarageBin;
 
-class FreetimersFifoTest extends TestCase {
+class FreetimersStorageBinCalcTest extends TestCase {
     public function test_fifo_calc()
     {   // gaap = Grnerally Accdpted Accounting Principles
 
