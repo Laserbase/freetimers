@@ -159,7 +159,6 @@ class StorageBin extends Model
 
         return $result;
     }
-
     public function getStatus() {
         return [
             "product_id" => $this->product_id, 
