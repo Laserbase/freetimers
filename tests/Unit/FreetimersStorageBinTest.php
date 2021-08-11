@@ -26,9 +26,9 @@ class FreetimersStorageBinTest extends TestCase
         $this->assertIsObject($bin);
     }
 
-    public function test_cannot_create_with_zero_stock()
+    public function test_can_create_with_zero_stock()
     {
-        $this->expectException(\app\Models\StorageException::class);
+        //$this->expectException(\app\Models\StorageException::class);
         $bin = new \App\Models\StorageBin("bolts", 0, 10.00, date("2021-01-01"));
     }
 
