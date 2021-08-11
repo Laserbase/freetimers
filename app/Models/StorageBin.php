@@ -33,17 +33,18 @@ class StorageBin extends Model
     public function __construct(string $product_id, int $quantity, float $cost, string $date_purchased, $calc_method = 'fifo')
     {
         $this->set_calc_method($product_id, $calc_method);
+        $this->check_quantity($quantity, 0);
 
         $this->product_id = $product_id;
-        $this->level = 0;
+        $this->level = $quantity;
         $this->control = [];
-        $this->status = 'ok';
+        $this->status = $quantity ? 'ok' : 'empty';
 
-        $this->add($product_id, $quantity, $cost, $date_purchased);
+        $this->add_history($quantity, $cost, $date_purchased);
     }
     public function add(string $product_id, int $quantity, float $cost, string $date_purchased)
     {
-        $this->check_quantity($quantity)
+        $this->check_quantity($quantity, 1)
             ->check_product_id($product_id)
             ->check_can_add($quantity);
 
@@ -51,14 +52,7 @@ class StorageBin extends Model
         $this->setStatus('ok');
         $this->overflow = 0;
 
-        $item = ["quantity" => $quantity, "cost" => $cost, "date" => $date_purchased];
-        if ($this->calc_method === 'lifo') {
-            // last in first out // queue
-            array_unshift($this->control, $item);
-        } else {
-            // fifo, avco
-            $this->control[] = $item;
-        }
+        $this->add_history($quantity, $cost, $date_purchased);
     }
 
     public function remove(string $product_id, int $quantity) : int
@@ -106,7 +100,7 @@ class StorageBin extends Model
             throw new StorageException("Unable to move '{$quantity}' of '{$product_id}' to '{$to_product_id}', they must be the same product");
         }
 
-        $this->check_quantity($quantity)
+        $this->check_quantity($quantity, 1)
             ->check_stock_level($product_id, $quantity)
             ->check_can_remove($quantity);
 
@@ -190,6 +184,18 @@ class StorageBin extends Model
     }
 
     //--- private ---
+    private function add_history(int $quantity, float $cost, string $date_purchased)
+    {
+        $item = ["quantity" => $quantity, "cost" => $cost, "date" => $date_purchased];
+        if ($this->calc_method === 'lifo') {
+            // last in first out // queue
+            array_unshift($this->control, $item);
+        } else {
+            // fifo, avco
+            $this->control[] = $item;
+        }
+
+    }
     private function set_calc_method(string $product_id, string $calc_method)
     {
         switch ($calc_method) {
@@ -236,10 +242,10 @@ class StorageBin extends Model
 
         return $this;
     }
-    private function check_quantity(int $quantity) 
+    private function check_quantity(int $quantity, int $min = 1) 
     {
-        if ($quantity < 1) {
-            throw new StorageException("Unable to use quantity '{$quantity}' as it is less than 1 (one)");
+        if ($quantity < $min) {
+            throw new StorageException("Unable to use quantity '{$quantity}' as it is less than '{$min}'");
         }
 
         return $this;
