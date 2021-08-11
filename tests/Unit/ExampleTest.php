@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 
 namespace Tests\Unit;
 
@@ -79,18 +80,15 @@ class FreetimersTest extends TestCase
     {
         $bin = new \App\Models\StorageBin("bolts", 10, 10.00, date("2021-01-01"));
         $status = $bin->getStatus();
-        //$bin->log("status='".print_r($status, true)."'", __LINE__);
         $this->assertTrue($status["level"] === 10);
 
         $overflow = $bin->remove("bolts", 5);
         $status = $bin->getStatus();
-        //$bin->log("status='".print_r($status, true)."'", __LINE__);
         $this->assertTrue($overflow === 0);
         $this->assertTrue($status["level"] === 5);
 
         $overflow = $bin->remove("bolts", 6);
         $status = $bin->getStatus();
-        //$bin->log("status='".print_r($status, true)."'", __LINE__);
         $this->assertTrue($overflow === 1); 
         $this->assertTrue($status["level"] === 0);
 
@@ -175,8 +173,6 @@ class FreetimersTest extends TestCase
         $overflow = $bolts1->move($bolts2, 9);
         $status1 = $bolts1->getStatus();
         $status2 = $bolts2->getStatus();
-        //$bolts1->log("bolts1='".print_r($status1, true)."'", __LINE__);
-        //$bolts2->log("bolts2='".print_r($status2, true)."'", __LINE__);
 
         $this->assertTrue($status1['level'] === 1);
         $this->assertTrue($status2['level'] === 19);
@@ -249,9 +245,6 @@ class FreetimersTest extends TestCase
         $status2 = $bolts2->getStatus();
         $this->assertTrue($status2["overflow"] === 0);
         $this->assertTrue($status2['level'] === 11);
-
-        //$bolts1->log("overflow='".print_r($overflow, true)."'", __LINE__);
-        //$bolts1->log("bolts1='".print_r($bolts1, true)."'", __LINE__);
     }
 
 }

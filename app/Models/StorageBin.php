@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 
 namespace App\Models;
 
@@ -52,7 +53,7 @@ class StorageBin extends Model
 
         $item = ["quantity" => $quantity, "cost" => $cost, "date" => $date_purchased];
         if ($this->calc_method === 'lifo') {
-            // 
+            // last in first out // queue
             array_unshift($this->control, $item);
         } else {
             // fifo, avco
@@ -145,6 +146,25 @@ class StorageBin extends Model
     {
         $this->setStatus('spoiled');
     }
+    public function calc() : array
+    {
+        $result = [
+            'avco' => 0.00,
+            'quantity' => 0,
+            'total' => 0.00
+        ];
+    
+        foreach ($this->control as $control) {
+            $result['quantity'] += (int) $control['quantity'];
+            $result['total']  += (float) $control['quantity'] * $control['cost'];
+
+        }
+        if ($result['quantity'] > 0) {
+            $result['avco'] = (float) $result['total'] / $result['quantity'];
+        }
+
+        return $result;
+    }
 
     public function getStatus() {
         return [
@@ -211,7 +231,7 @@ class StorageBin extends Model
     private function check_product_id(string $product_id)
     {
         if ($this->product_id !== $product_id) {
-            throw new StorageException("This storage bin is for '$this->product_id', unable to add '{$product_id}'");
+            throw new StorageException("This storage bin is for '$this->product_id', unable to change stock level using '{$product_id}'");
         }
 
         return $this;
