@@ -81,13 +81,11 @@ class StorageBin extends Model
             }
 
             $this->level -= $quantity_available;
-            $this->control[$key]['quantity'] -= $quantity_available;
-
-        
+            $this->control[$key]['quantity'] -= $quantity_available;        
         }
 
         if ($this->level < 1) {
-            $this->status = 'empty';
+            $this->setStatus('empty');
         }
 
         return $this->overflow = $quantity_to_remove;
@@ -128,7 +126,7 @@ class StorageBin extends Model
         }
 
         if ($this->level < 1) {
-            $this->status = 'empty';
+            $this->setStatus('empty');
         }
 
         return $this->overflow = $quantity_to_move;
