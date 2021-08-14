@@ -13,7 +13,7 @@ class FreetimersStorageBinMoveTest extends TestCase
         public function test_moving_stock_different_products()
         {
             $this->expectException(\app\Models\StorageException::class);
-            //$this->expectedExceptionMessage('xxx');
+            $this->expectExceptionMessageMatches("/This storage bin is for 'bolts', unable to change stock level using 'screws'/");
     
             $bolts = new \App\Models\StorageBin("bolts", 10, 1.00, date("2021-01-01"));
             $screws = new \App\Models\StorageBin("screws", 10, 1.00, date("2021-01-01"));
@@ -23,6 +23,7 @@ class FreetimersStorageBinMoveTest extends TestCase
         public function test_moving_zero_stock()
         {
             $this->expectException(\app\Models\StorageException::class);
+            $this->expectExceptionMessageMatches("/Unable to use quantity '0' as it is less than '1'/");
     
             $bolts1 = new \App\Models\StorageBin("bolts", 10, 0.00, date("2021-01-01"));
             $bolts2 = new \App\Models\StorageBin("bolts", 10, 1.00, date("2021-01-01"));
