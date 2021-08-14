@@ -96,11 +96,8 @@ class StorageBin extends Model
     {
         $product_id = $this->product_id;
         $to_product_id = $to_bin->getStatus()['product_id'];
-        if ($product_id !== $to_product_id) {
-            throw new StorageException("Unable to move '{$quantity}' of '{$product_id}' to '{$to_product_id}', they must be the same product");
-        }
-
-        $this->check_quantity($quantity, 1)
+        $this->check_product_id($to_product_id)
+            ->check_quantity($quantity, 1)
             ->check_stock_level($product_id, $quantity)
             ->check_can_remove($quantity);
 
